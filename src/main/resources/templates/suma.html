@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>suma</title>
+</head>
+<body>
+    <p>el resultat de la suma de <span th:text="${n1}" /> + <span th:text="${n2}" /> és  <span th:text="${n1+n2}" /></p>
+
+    <ul>
+        <li th:each="numero : ${llista}" th:text="${numero}"> </li>
+    </ul>
+</body>
+</html>
