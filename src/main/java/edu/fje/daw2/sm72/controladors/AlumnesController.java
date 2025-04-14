@@ -37,10 +37,17 @@ public class AlumnesController {
         return "alumnes/consultarAlumnes";
     }
     @PostMapping("/esborrarAlumne")
-    public String esborrarAlumne(@SessionAttribute("llistaAlumnes") ArrayList<Alumne> alumnes, @RequestParam(required = true) int id, Model model) {
-        alumnes.remove(new Alumne(id));
-//        model.addAttribute("llistaAlumnes", alumnes);
-        return "alumnes/consultarAlumnes";
+    public String esborrarAlumne(@SessionAttribute("llistaAlumnes") ArrayList<Alumne> alumnes,
+                                 @RequestParam(required = true) int id, Model model) {
+        // Crear un nuevo Alumne solo con el id para buscarlo en la lista
+        Alumne alumneToRemove = new Alumne(id);
+
+        // Eliminar el alumno si existe
+        alumnes.removeIf(alumne -> alumne.getId() == id);
+
+        // Actualizar el modelo con la lista de alumnos
+        model.addAttribute("llistaAlumnes", alumnes);
+        return "alumnes/consultarAlumnes";  // Redirigir a la vista de consulta de alumnos
     }
     @PostMapping("/modificarAlumne")
     public String modificarAlumne(@SessionAttribute("llistaAlumnes") ArrayList<Alumne> alumnes,
@@ -48,11 +55,21 @@ public class AlumnesController {
                                   @RequestParam(required = true) String nom,
                                   @RequestParam(required = true) int nota,
                                   Model model) {
-        Alumne alumne = alumnes.get(alumnes.indexOf(new Alumne(id)));
-        alumne.setNom(nom);
-        alumne.setNota(nota);
-//        model.addAttribute("llistaAlumnes", alumnes);
-        return "alumnes/consultarAlumnes";
+        // Buscar el alumno por su id
+        Alumne alumneToModify = alumnes.stream()
+                .filter(alumne -> alumne.getId() == id)
+                .findFirst()
+                .orElse(null);
+
+        if (alumneToModify != null) {
+            // Modificar los datos del alumno
+            alumneToModify.setNom(nom);
+            alumneToModify.setNota(nota);
+        }
+
+        // Actualizar el modelo con la lista de alumnos
+        model.addAttribute("llistaAlumnes", alumnes);
+        return "alumnes/consultarAlumnes";  // Redirigir a la vista de consulta de alumnos
     }
 
 }

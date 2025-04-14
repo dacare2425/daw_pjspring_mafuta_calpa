@@ -1,4 +1,4 @@
-package edu.fje.daw2.sm72.model;
+package edu.fje.daw2.sm72.models;
 
 import jakarta.persistence.*;
 

@@ -1,0 +1,79 @@
+/* colors inspirats en la web: blanc i morat clar */
+:root {
+    --purple: #b48eff;
+    --dark-purple: #a66df1;
+    --white: #ffffff;
+    --black: #000000;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--white);
+    color: var(--black);
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: var(--purple);
+    color: var(--white);
+}
+
+.main-header .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.main-header nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+}
+
+.main-header nav a {
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.main-content {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.main-content h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.main-content p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.cta-button {
+    background-color: var(--dark-purple);
+    color: var(--white);
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: var(--purple);
+}
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: var(--purple);
+    color: var(--white);
+}
