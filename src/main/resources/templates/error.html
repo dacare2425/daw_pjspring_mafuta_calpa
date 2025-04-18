@@ -1,10 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Alumnes</title>
+    <title>Error</title>
 </head>
 <body>
-401 NOT FOUND
+<h1>Oops! Algo salió mal.</h1>
+
+<p><strong>Status:</strong> <span th:text="${status}">Error Status</span></p>
+<p><strong>Mensaje:</strong> <span th:text="${error}">Mensaje de error</span></p>
+<p><strong>Ruta:</strong> <span th:text="${path}">Ruta que causó el error</span></p>
+<p><strong>Excepción:</strong> <span th:text="${exception}">Detalles</span></p>
+<p><strong>Trace:</strong></p>
+<pre th:text="${trace}">Stack trace si está disponible</pre>
 </body>
 </html>

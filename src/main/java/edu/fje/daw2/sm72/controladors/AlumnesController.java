@@ -19,7 +19,7 @@ public class AlumnesController {
     }
     //private ArrayList<Alumne> alumnes = new ArrayList<Alumne>();
     private int numId=1;
-    @PostMapping("/afegirAlumne")
+    @PostMapping("/afEWNOSegirAlumne")
     public String afegirAlumne(
             @SessionAttribute("llistaAlumnes") ArrayList<Alumne> alumnes,
             @RequestParam(required = true) String nom,
