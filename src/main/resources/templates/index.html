@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Películas App</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .navbar-brand {
+      font-weight: bold;
+    }
+    .hero-section {
+      background-color: #f8f9fa;
+      padding: 3rem 0;
+      margin-bottom: 2rem;
+    }
+    .footer {
+      margin-top: 3rem;
+      padding: 1.5rem 0;
+      background-color: #f8f9fa;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="/">Películas App</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Inicio</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/peliculas">Películas</a>
+        </li>
+      </ul>
+
+      <!-- User not logged in -->
+      <ul class="navbar-nav" sec:authorize="!isAuthenticated()">
+        <li class="nav-item">
+          <a class="nav-link" href="/login">Iniciar Sesión</a>
+        </li>
+      </ul>
+
+      <!-- User logged in -->
+      <ul class="navbar-nav" sec:authorize="isAuthenticated()">
+        <!-- Admin section -->
+        <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
+          <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">
+            Administración
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+            <li><a class="dropdown-item" href="/admin/usuarios">Gestionar Usuarios</a></li>
+            <li><a class="dropdown-item" href="/admin/peliculas">Gestionar Películas</a></li>
+          </ul>
+        </li>
+
+        <!-- User profile -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+             data-bs-toggle="dropdown" aria-expanded="false">
+            <span sec:authentication="name">Usuario</span>
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="userDropdown">
+            <li><a class="dropdown-item" href="/perfil">Mi Perfil</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form th:action="@{/logout}" method="post" class="dropdown-item p-0">
+                <button type="submit" class="btn btn-link text-decoration-none w-100 text-start px-3 py-1">
+                  Cerrar Sesión
+                </button>
+              </form>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container text-center">
+    <h1>Bienvenido a Películas App</h1>
+    <p class="lead">Explora nuestra colección de películas y series</p>
+    <a href="/peliculas" class="btn btn-primary btn-lg">Ver Películas</a>
+  </div>
+</section>
+
+<!-- Main Content -->
+<div class="container">
+  <div class="row">
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Películas</h5>
+          <p class="card-text">Explora nuestra colección de películas.</p>
+          <a href="/peliculas" class="btn btn-primary">Ver Películas</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Novedades</h5>
+          <p class="card-text">Descubre las últimas películas añadidas.</p>
+          <a href="/peliculas/novedades" class="btn btn-primary">Ver Novedades</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Populares</h5>
+          <p class="card-text">Las películas más populares entre nuestros usuarios.</p>
+          <a href="/peliculas/populares" class="btn btn-primary">Ver Populares</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Section (only visible to admins) -->
+  <div class="row mt-4" sec:authorize="hasRole('ADMIN')">
+    <div class="col-12">
+      <div class="card bg-light">
+        <div class="card-body">
+          <h4 class="card-title">Administración</h4>
+          <p class="card-text">Accede a las herramientas de administración.</p>
+          <a href="/admin/usuarios" class="btn btn-success me-2">Gestionar Usuarios</a>
+          <a href="/admin/peliculas" class="btn btn-success">Gestionar Películas</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2023 Películas App - Todos los derechos reservados</p>
+  </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

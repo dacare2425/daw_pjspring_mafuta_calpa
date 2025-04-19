@@ -1,20 +1,27 @@
 package edu.fje.daw2.sm72.models;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
 
-@Document(collection = "usuarios")
+@Entity
+@Table(name = "usuarios")
 public class Usuario {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String nombre;
     private String correo;
     private String contrasena;
     private boolean esAdmin;
 
-    // Constructores
+    private String provider;
+    private String providerId;
+
     public Usuario() {}
 
     public Usuario(String nombre, String correo, String contrasena, boolean esAdmin) {
@@ -24,13 +31,39 @@ public class Usuario {
         this.esAdmin = esAdmin;
     }
 
+    public Usuario(String nombre, String correo, String provider, String providerId) {
+        this.nombre = nombre;
+        this.correo = correo;
+        this.contrasena = null;
+        this.esAdmin = false;
+        this.provider = provider;
+        this.providerId = providerId;
+    }
+
+    // Add getters and setters for new fields
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
+
     // Getters y Setters
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.id = Long.valueOf(id);
     }
 
     public String getNombre() {

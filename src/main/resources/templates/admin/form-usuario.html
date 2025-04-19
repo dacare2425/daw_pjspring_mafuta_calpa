@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Formulario de Usuario</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Add your CSS here -->
+</head>
+<body>
+<h1 th:text="${usuario.id != null ? 'Editar Usuario' : 'Nuevo Usuario'}"></h1>
+
+<form th:action="@{/admin/usuarios/guardar}" th:object="${usuario}" method="post">
+  <input type="hidden" th:field="*{id}" />
+
+  <div class="mb-3">
+    <label for="nombre" class="form-label">Nombre</label>
+    <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required />
+  </div>
+
+  <div class="mb-3">
+    <label for="correo" class="form-label">Correo</label>
+    <input type="email" class="form-control" id="correo" th:field="*{correo}" required />
+  </div>
+
+  <div class="mb-3" th:if="${usuario.id == null || usuario.contrasena != null}">
+    <label for="contrasena" class="form-label">Contraseña</label>
+    <input type="password" class="form-control" id="contrasena" th:field="*{contrasena}"
+           th:required="${usuario.id == null}" />
+    <small class="text-muted" th:if="${usuario.id != null}">Dejar en blanco para mantener la contraseña actual</small>
+  </div>
+
+  <div class="mb-3 form-check">
+    <input type="checkbox" class="form-check-input" id="esAdmin" th:field="*{esAdmin}" />
+    <label class="form-check-label" for="esAdmin">Es Administrador</label>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Guardar</button>
+  <a th:href="@{/admin/usuarios}" class="btn btn-secondary">Cancelar</a>
+</form>
+</body>
+</html>
