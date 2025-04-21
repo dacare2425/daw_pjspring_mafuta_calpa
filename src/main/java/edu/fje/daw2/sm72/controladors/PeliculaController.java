@@ -40,7 +40,7 @@ public class PeliculaController {
 
         // Obtener el usuario actual y sus películas seleccionadas
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String correoUsuario = auth.getName();
+        String correoUsuario = obtenerCorreoUsuario(auth);
 
         Optional<Usuario> usuarioOpt = usuarioServei.obtenerPorCorreo(correoUsuario);
 
@@ -52,9 +52,12 @@ public class PeliculaController {
             model.addAttribute("peliculasSeleccionadas", List.of());
         }
 
+        // Si la plantilla está en una subcarpeta llamada "peliculas", usa esta ruta:
         return "peliculas/catalogo";
-    }
 
+        // Si la plantilla está directamente en la carpeta templates, usa esta ruta:
+        // return "catalogo";
+    }
     /**
      * Muestra las películas seleccionadas por el usuario
      */
@@ -62,19 +65,7 @@ public class PeliculaController {
     public String misPeliculas(Model model) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-            // Extraer el correo electrónico del OAuth2 Principal
-            String correoUsuario;
-
-            if (auth.getPrincipal() instanceof OAuth2User) {
-                OAuth2User oauth2User = (OAuth2User) auth.getPrincipal();
-                correoUsuario = oauth2User.getAttribute("email");
-            } else if (auth.getPrincipal() instanceof DefaultOidcUser) {
-                DefaultOidcUser oidcUser = (DefaultOidcUser) auth.getPrincipal();
-                correoUsuario = oidcUser.getEmail();
-            } else {
-                correoUsuario = auth.getName();
-            }
+            String correoUsuario = obtenerCorreoUsuario(auth);
 
             Optional<Usuario> usuarioOpt = usuarioServei.obtenerPorCorreo(correoUsuario);
 
@@ -121,27 +112,7 @@ public class PeliculaController {
     public String agregarPelicula(@PathVariable String id, RedirectAttributes redirectAttributes) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-            // Extraer el correo electrónico del OAuth2 Principal
-            String correoUsuario;
-
-            if (auth.getPrincipal() instanceof Map) {
-                // Si es un mapa de atributos (común en algunos flujos OAuth2)
-                @SuppressWarnings("unchecked")
-                Map<String, Object> attributes = (Map<String, Object>) auth.getPrincipal();
-                correoUsuario = (String) attributes.get("email");
-            } else if (auth.getPrincipal() instanceof OAuth2User) {
-                // Si es un OAuth2User (más común)
-                OAuth2User oauth2User = (OAuth2User) auth.getPrincipal();
-                correoUsuario = oauth2User.getAttribute("email");
-            } else if (auth.getPrincipal() instanceof DefaultOidcUser) {
-                // Si es un DefaultOidcUser (específico para OpenID Connect)
-                DefaultOidcUser oidcUser = (DefaultOidcUser) auth.getPrincipal();
-                correoUsuario = oidcUser.getEmail();
-            } else {
-                // Fallback al nombre de usuario (probablemente el ID de Google)
-                correoUsuario = auth.getName();
-            }
+            String correoUsuario = obtenerCorreoUsuario(auth);
 
             System.out.println("Correo extraído: " + correoUsuario);
 
@@ -215,35 +186,74 @@ public class PeliculaController {
         }
         return "redirect:/peliculas/catalogo";
     }
+
     /**
      * Elimina una película de la lista personal del usuario
+     * Acepta tanto POST como DELETE para mayor compatibilidad
      */
-    @PostMapping("/eliminar/{id}")
+    @RequestMapping(value = "/eliminar/{id}", method = {RequestMethod.POST, RequestMethod.DELETE})
     public String eliminarPelicula(@PathVariable String id, RedirectAttributes redirectAttributes) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String correoUsuario = auth.getName();
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String correoUsuario = obtenerCorreoUsuario(auth);
 
-        Optional<Usuario> usuarioOpt = usuarioServei.obtenerPorCorreo(correoUsuario);
+            Optional<Usuario> usuarioOpt = usuarioServei.obtenerPorCorreo(correoUsuario);
 
-        if (usuarioOpt.isPresent()) {
-            Usuario usuario = usuarioOpt.get();
+            if (usuarioOpt.isPresent()) {
+                Usuario usuario = usuarioOpt.get();
 
-            if (usuario.getPeliculasSeleccionadas().contains(id)) {
-                usuario.eliminarPelicula(id);
-                usuarioServei.guardar(usuario);
-
+                // Obtener la película antes de eliminarla para mostrar su título
                 Pelicula pelicula = peliculaServei.obtenirPerId(id);
                 String titulo = pelicula != null ? pelicula.getTitulo() : "Película";
 
-                redirectAttributes.addFlashAttribute("mensaje", titulo + " eliminada de tu lista");
-                redirectAttributes.addFlashAttribute("tipoMensaje", "success");
+                if (usuario.getPeliculasSeleccionadas().contains(id)) {
+                    usuario.eliminarPelicula(id);
+                    usuarioServei.guardar(usuario);
+
+                    redirectAttributes.addFlashAttribute("mensaje", titulo + " eliminada de tu lista");
+                    redirectAttributes.addFlashAttribute("tipoMensaje", "success");
+                } else {
+                    redirectAttributes.addFlashAttribute("mensaje", "La película no está en tu lista");
+                    redirectAttributes.addFlashAttribute("tipoMensaje", "warning");
+                }
+            } else {
+                redirectAttributes.addFlashAttribute("mensaje", "Usuario no encontrado");
+                redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
             }
-        } else {
-            redirectAttributes.addFlashAttribute("mensaje", "Error al eliminar la película");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensaje", "Error al eliminar la película: " + e.getMessage());
             redirectAttributes.addFlashAttribute("tipoMensaje", "danger");
+            System.err.println("Error al eliminar película: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return "redirect:/peliculas/mis-peliculas";
     }
 
+    /**
+     * Método auxiliar para obtener el correo del usuario desde diferentes tipos de autenticación
+     */
+    private String obtenerCorreoUsuario(Authentication auth) {
+        String correoUsuario;
+
+        if (auth.getPrincipal() instanceof Map) {
+            // Si es un mapa de atributos (común en algunos flujos OAuth2)
+            @SuppressWarnings("unchecked")
+            Map<String, Object> attributes = (Map<String, Object>) auth.getPrincipal();
+            correoUsuario = (String) attributes.get("email");
+        } else if (auth.getPrincipal() instanceof OAuth2User) {
+            // Si es un OAuth2User (más común)
+            OAuth2User oauth2User = (OAuth2User) auth.getPrincipal();
+            correoUsuario = oauth2User.getAttribute("email");
+        } else if (auth.getPrincipal() instanceof DefaultOidcUser) {
+            // Si es un DefaultOidcUser (específico para OpenID Connect)
+            DefaultOidcUser oidcUser = (DefaultOidcUser) auth.getPrincipal();
+            correoUsuario = oidcUser.getEmail();
+        } else {
+            // Fallback al nombre de usuario (probablemente el ID de Google)
+            correoUsuario = auth.getName();
+        }
+
+        return correoUsuario;
+    }
 }

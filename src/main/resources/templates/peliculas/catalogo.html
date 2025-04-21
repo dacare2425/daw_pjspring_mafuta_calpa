@@ -1,238 +1,522 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Catálogo de Películas - ClotFilms</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .movie-card {
-            transition: transform 0.3s;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
+  <title>Catálogo de Películas - ClotFilms</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .movie-card {
+      transition: transform 0.3s;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .movie-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
+    .movie-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
 
-        .card-img-top {
-            height: 200px;
-            object-fit: cover;
-        }
+    .card-img-top {
+      height: 300px;
+      object-fit: cover;
+    }
 
-        .card-body {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
+    .card-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .card-footer {
-            background-color: transparent;
-            border-top: none;
-            margin-top: auto;
-        }
+    .card-footer {
+      background-color: transparent;
+      border-top: none;
+      margin-top: auto;
+    }
 
-        .genre-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
+    .genre-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
 
-        .alert-floating {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-            min-width: 300px;
-        }
-    </style>
+    .alert-floating {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+      min-width: 300px;
+    }
+
+    /* Modal para detalles de película */
+    .movie-details-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 1050;
+      overflow-y: auto;
+    }
+
+    .movie-details-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 5px;
+      max-width: 800px;
+      position: relative;
+    }
+
+    .close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .loading-spinner {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+    }
+  </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="/">ClotFilms</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link active" href="/peliculas/catalogo">Catálogo</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/peliculas/mis-peliculas">Mis Películas</a>
-                </li>
-            </ul>
-            <div class="d-flex" sec:authorize="isAuthenticated()">
-                    <span class="navbar-text me-3">
-                        <i class="fas fa-user me-1"></i>                         <span
-                            th:text="${#authentication.principal.attributes['email']}">correo@ejemplo.com</span>
-
-                    </span>
-                <form th:action="@{/logout}" method="post">
-                    <button type="submit" class="btn btn-outline-light btn-sm">Cerrar Sesión</button>
-                </form>
-            </div>
-        </div>
+  <div class="container">
+    <a class="navbar-brand" href="/">ClotFilms</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="/peliculas/catalogo">Catálogo</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/peliculas/mis-peliculas">Mis Películas</a>
+        </li>
+      </ul>
+      <div class="d-flex" sec:authorize="isAuthenticated()">
+                <span class="navbar-text me-3">
+                    <i class="fas fa-user me-1"></i>
+                    <span th:text="${#authentication.principal.attributes['email']}">correo@ejemplo.com</span>
+                </span>
+        <form th:action="@{/logout}" method="post">
+          <button type="submit" class="btn btn-outline-light btn-sm">Cerrar Sesión</button>
+        </form>
+      </div>
     </div>
+  </div>
 </nav>
 
 <!-- Alerta para mensajes flash -->
 <div th:if="${mensaje}" th:class="'alert alert-' + ${tipoMensaje} + ' alert-dismissible fade show alert-floating'"
      role="alert">
-    <span th:text="${mensaje}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <span th:text="${mensaje}"></span>
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 
 <div class="container py-5">
-    <div class="row mb-4">
-        <div class="col">
-            <h1 class="display-5 fw-bold">Catálogo de Películas</h1>
-            <p class="lead">Explora nuestro catálogo y añade películas a tu lista personal.</p>
-        </div>
+  <div class="row mb-4">
+    <div class="col">
+      <h1 class="display-5 fw-bold">Catálogo de Películas</h1>
+      <p class="lead">Explora nuestro catálogo y añade películas a tu lista personal.</p>
     </div>
+  </div>
 
-    <!-- Filtros -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="input-group">
-                <input type="text" id="searchInput" class="form-control" placeholder="Buscar películas...">
-                <button class="btn btn-outline-secondary" type="button" id="searchButton">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <select id="genreFilter" class="form-select">
-                <option value="">Todos los géneros</option>
-                <option value="Acción">Acción</option>
-                <option value="Animación">Animación</option>
-                <option value="Ciencia Ficción">Ciencia Ficción</option>
-                <option value="Comedia">Comedia</option>
-                <option value="Crimen">Crimen</option>
-                <option value="Drama">Drama</option>
-                <option value="Fantasía">Fantasía</option>
-                <option value="Terror">Terror</option>
-                <option value="Thriller">Thriller</option>
-            </select>
-        </div>
+  <!-- Filtros -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="input-group">
+        <input type="text" id="searchInput" class="form-control" placeholder="Buscar películas...">
+        <button class="btn btn-outline-secondary" type="button" id="searchButton">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
     </div>
+    <div class="col-md-6">
+      <select id="genreFilter" class="form-select">
+        <option value="">Todos los géneros</option>
+        <option value="Acción">Acción</option>
+        <option value="Animación">Animación</option>
+        <option value="Ciencia Ficción">Ciencia Ficción</option>
+        <option value="Comedia">Comedia</option>
+        <option value="Crimen">Crimen</option>
+        <option value="Drama">Drama</option>
+        <option value="Fantasía">Fantasía</option>
+        <option value="Terror">Terror</option>
+        <option value="Thriller">Thriller</option>
+      </select>
+    </div>
+  </div>
 
-    <!-- Catálogo de películas -->
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="movieGrid">
-        <div class="col movie-item" th:each="pelicula : ${peliculas}" th:data-genre="${pelicula.genero}"
-             th:data-title="${pelicula.titulo}">
-            <div class="card movie-card h-100">
-                    <span th:class="'badge genre-badge bg-' + ${#strings.equals(pelicula.genero, 'Acción') ? 'danger' :
-                                                              #strings.equals(pelicula.genero, 'Drama') ? 'primary' :
-                                                              #strings.equals(pelicula.genero, 'Comedia') ? 'success' :
-                                                              #strings.equals(pelicula.genero, 'Ciencia Ficción') ? 'info' :
-                                                              #strings.equals(pelicula.genero, 'Terror') ? 'dark' :
-                                                              #strings.equals(pelicula.genero, 'Fantasía') ? 'warning' :
-                                                              #strings.equals(pelicula.genero, 'Animación') ? 'secondary' :
-                                                              #strings.equals(pelicula.genero, 'Thriller') ? 'danger' :
-                                                              'secondary'}"
-                          th:text="${pelicula.genero}">
-                    </span>
-                <!-- Imagen de la película (placeholder) -->
-                <img class="card-img-top" th:src="'https://picsum.photos/seed/' + ${pelicula.id} + '/400/200'"
-                     alt="Imagen de película">
-                <div class="card-body">
-                    <h5 class="card-title" th:text="${pelicula.titulo}">Título de la Película</h5>
-                    <p class="card-text">
-                        <small class="text-muted">
-                            <i class="fas fa-film me-1"></i> <span th:text="${pelicula.director}">Director</span>
-                        </small>
-                    </p>
-                    <p class="card-text">
-                        <small class="text-muted">
-                            <i class="fas fa-calendar me-1"></i> <span th:text="${pelicula.anyo}">Año</span>
-                        </small>
-                    </p>
-                </div>
-                <div class="card-footer text-center">
-                    <!-- Botón para añadir a mi lista -->
-                    <form th:if="${!peliculasSeleccionadas.contains(pelicula.id)}"
-                          th:action="@{/peliculas/agregar/{id}(id=${pelicula.id})}" method="post">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-plus me-1"></i> Añadir a mi lista
-                        </button>
-                    </form>
-                    <!-- Mensaje si ya está en mi lista -->
-                    <button th:if="${peliculasSeleccionadas.contains(pelicula.id)}"
-                            class="btn btn-success w-100" disabled>
-                        <i class="fas fa-check me-1"></i> En mi lista
-                    </button>
-                </div>
-            </div>
-        </div>
+  <!-- Indicador de carga -->
+  <div id="loadingSpinner" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
     </div>
+    <p>Cargando pósters de películas...</p>
+  </div>
 
-    <!-- Mensaje si no hay películas -->
-    <div th:if="${#lists.isEmpty(peliculas)}" class="alert alert-info mt-4">
-        No hay películas disponibles en el catálogo.
+  <!-- Catálogo de películas -->
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="movieGrid">
+    <div class="col movie-item" th:each="pelicula : ${peliculas}" th:data-genre="${pelicula.genero}"
+         th:data-title="${pelicula.titulo}" th:data-id="${pelicula.id}" th:data-year="${pelicula.anyo}"
+         th:data-director="${pelicula.director}">
+      <div class="card movie-card h-100">
+                <span th:class="'badge genre-badge bg-' + ${#strings.equals(pelicula.genero, 'Acción') ? 'danger' :
+                                                          #strings.equals(pelicula.genero, 'Drama') ? 'primary' :
+                                                          #strings.equals(pelicula.genero, 'Comedia') ? 'success' :
+                                                          #strings.equals(pelicula.genero, 'Ciencia Ficción') ? 'info' :
+                                                          #strings.equals(pelicula.genero, 'Terror') ? 'dark' :
+                                                          #strings.equals(pelicula.genero, 'Fantasía') ? 'warning' :
+                                                          #strings.equals(pelicula.genero, 'Animación') ? 'secondary' :
+                                                          #strings.equals(pelicula.genero, 'Thriller') ? 'danger' :
+                                                          'secondary'}"
+                      th:text="${pelicula.genero}">
+                </span>
+        <!-- Imagen de la película (se reemplazará con póster de OMDB) -->
+        <img class="card-img-top poster-img" th:data-title="${pelicula.titulo}" th:data-year="${pelicula.anyo}"
+             th:src="'https://dummyimage.com/400x600/000/fff.png&text=' + ${pelicula.titulo}"
+             th:alt="${'Póster de ' + pelicula.titulo}">
+        <div class="card-body">
+          <h5 class="card-title" th:text="${pelicula.titulo}">Título de la Película</h5>
+          <p class="card-text">
+            <small class="text-muted">
+              <i class="fas fa-film me-1"></i> <span th:text="${pelicula.director}">Director</span>
+            </small>
+          </p>
+          <p class="card-text">
+            <small class="text-muted">
+              <i class="fas fa-calendar me-1"></i> <span th:text="${pelicula.anyo}">Año</span>
+            </small>
+          </p>
+        </div>
+        <div class="card-footer text-center">
+          <!-- Botón para añadir a mi lista -->
+          <form th:if="${!peliculasSeleccionadas.contains(pelicula.id)}"
+                th:action="@{/peliculas/agregar/{id}(id=${pelicula.id})}" method="post">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fas fa-plus me-1"></i> Añadir a mi lista
+            </button>
+          </form>
+          <!-- Mensaje si ya está en mi lista -->
+          <button th:if="${peliculasSeleccionadas.contains(pelicula.id)}"
+                  class="btn btn-success w-100" disabled>
+            <i class="fas fa-check me-1"></i> En mi lista
+          </button>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- Mensaje si no hay películas -->
+  <div th:if="${#lists.isEmpty(peliculas)}" class="alert alert-info mt-4">
+    No hay películas disponibles en el catálogo.
+  </div>
+</div>
+
+<!-- Modal para detalles de película -->
+<div id="movieDetailsModal" class="movie-details-modal">
+  <div class="movie-details-content">
+    <span class="close-button" onclick="closeMovieDetails()">&times;</span>
+    <div id="movieDetailsContent"></div>
+  </div>
 </div>
 
 <footer class="bg-dark text-white py-4 mt-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <h5>ClotFilms</h5>
-                <p>Tu plataforma de películas favorita</p>
-            </div>
-            <div class="col-md-6 text-md-end">
-                <p>&copy; 2023 ClotFilms. Todos los derechos reservados.</p>
-            </div>
-        </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <h5>ClotFilms</h5>
+        <p>Tu plataforma de películas favorita</p>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <p>&copy; 2023 ClotFilms. Todos los derechos reservados.</p>
+      </div>
     </div>
+  </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Filtrado de películas por título y género
-    document.addEventListener('DOMContentLoaded', function () {
-        const searchInput = document.getElementById('searchInput');
-        const searchButton = document.getElementById('searchButton');
-        const genreFilter = document.getElementById('genreFilter');
-        const movieItems = document.querySelectorAll('.movie-item');
+  // Filtrado de películas por título y género
+  document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const genreFilter = document.getElementById('genreFilter');
+    const movieItems = document.querySelectorAll('.movie-item');
+    const loadingSpinner = document.getElementById('loadingSpinner');
 
-        function filterMovies() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const selectedGenre = genreFilter.value;
+    // Mostrar spinner de carga
+    loadingSpinner.style.display = 'block';
 
-            movieItems.forEach(item => {
-                const title = item.getAttribute('data-title').toLowerCase();
-                const genre = item.getAttribute('data-genre');
+    // Cargar pósters de películas desde OMDB
+    cargarPosters();
 
-                const matchesSearch = title.includes(searchTerm);
-                const matchesGenre = selectedGenre === '' || genre === selectedGenre;
+    function filterMovies() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const selectedGenre = genreFilter.value;
 
-                if (matchesSearch && matchesGenre) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
+      movieItems.forEach(item => {
+        const title = item.getAttribute('data-title').toLowerCase();
+        const genre = item.getAttribute('data-genre');
+
+        const matchesSearch = title.includes(searchTerm);
+        const matchesGenre = selectedGenre === '' || genre === selectedGenre;
+
+        if (matchesSearch && matchesGenre) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    searchButton.addEventListener('click', filterMovies);
+    searchInput.addEventListener('keyup', filterMovies);
+    genreFilter.addEventListener('change', filterMovies);
+
+    // Auto-cerrar alertas después de 5 segundos
+    setTimeout(function () {
+      const alerts = document.querySelectorAll('.alert-floating');
+      alerts.forEach(alert => {
+        const bsAlert = new bootstrap.Alert(alert);
+        bsAlert.close();
+      });
+    }, 5000);
+
+    // Añadir evento click a las tarjetas de películas para mostrar detalles
+    document.querySelectorAll('.movie-card').forEach(card => {
+      card.addEventListener('click', function() {
+        const movieItem = this.closest('.movie-item');
+        const id = movieItem.getAttribute('data-id');
+        const title = movieItem.getAttribute('data-title');
+        const year = movieItem.getAttribute('data-year');
+        const director = movieItem.getAttribute('data-director');
+        const posterUrl = this.querySelector('.poster-img').src;
+
+        showMovieDetails(id, title, year, director, posterUrl);
+      });
+    });
+  });
+
+  // Función para cargar pósters de películas desde OMDB
+  async function cargarPosters() {
+    const posterImgs = document.querySelectorAll('.poster-img');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+
+    try {
+      // Crear un array de promesas para cargar todos los pósters en paralelo
+      const promises = Array.from(posterImgs).map(async (img) => {
+        const title = img.getAttribute('data-title');
+        const year = img.getAttribute('data-year');
+
+        try {
+          // Primero intentamos buscar por título exacto
+          const response = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(title)}&y=${year}&apikey=8ce64598`);
+          const data = await response.json();
+
+          if (data.Response === "True" && data.Poster && data.Poster !== "N/A") {
+            img.src = data.Poster;
+            console.log(`Póster encontrado por título exacto para ${title}: ${data.Poster}`);
+            return;
+          }
+
+          // Si no encontramos por título exacto, intentamos buscar
+          const searchResponse = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(title)}&apikey=8ce64598`);
+          const searchData = await searchResponse.json();
+
+          if (searchData.Response === "True" && searchData.Search && searchData.Search.length > 0) {
+            // Intentamos encontrar una coincidencia por año
+            const matchingMovie = searchData.Search.find(movie => movie.Year === year);
+
+            if (matchingMovie && matchingMovie.Poster && matchingMovie.Poster !== "N/A") {
+              img.src = matchingMovie.Poster;
+              console.log(`Póster encontrado por búsqueda para ${title}: ${matchingMovie.Poster}`);
+              return;
+            }
+
+            // Si no hay coincidencia por año, usamos el primer resultado
+            if (searchData.Search[0].Poster && searchData.Search[0].Poster !== "N/A") {
+              img.src = searchData.Search[0].Poster;
+              console.log(`Póster encontrado (primer resultado) para ${title}: ${searchData.Search[0].Poster}`);
+              return;
+            }
+          }
+
+          // Si todo falla, intentamos traducir el título al inglés (simulado)
+          const translatedTitles = {
+            "El Padrino": "The Godfather",
+            "Pulp Fiction": "Pulp Fiction",
+            "El Caballero Oscuro": "The Dark Knight",
+            "La Lista de Schindler": "Schindler's List",
+            "El Señor de los Anillos": "The Lord of the Rings",
+            "Forrest Gump": "Forrest Gump",
+            "Origen": "Inception",
+            "Matrix": "The Matrix",
+            "Ciudad de Dios": "City of God",
+            "Seven": "Se7en",
+            "El Silencio de los Corderos": "The Silence of the Lambs",
+            "Interestelar": "Interstellar",
+            "Gladiador": "Gladiator",
+            "El Rey León": "The Lion King",
+            "El Club de la Lucha": "Fight Club"
+          };
+
+          const translatedTitle = translatedTitles[title] || title;
+
+          if (translatedTitle !== title) {
+            const translatedResponse = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(translatedTitle)}&apikey=8ce64598`);
+            const translatedData = await translatedResponse.json();
+
+            if (translatedData.Response === "True" && translatedData.Poster && translatedData.Poster !== "N/A") {
+              img.src = translatedData.Poster;
+              console.log(`Póster encontrado con título traducido para ${title} (${translatedTitle}): ${translatedData.Poster}`);
+              return;
+            }
+          }
+
+          console.log(`No se encontró póster para ${title}`);
+        } catch (error) {
+          console.error(`Error al buscar póster para ${title}:`, error);
+        }
+      });
+
+      // Esperar a que todas las promesas se resuelvan
+      await Promise.all(promises);
+    } catch (error) {
+      console.error("Error al cargar los pósters:", error);
+    } finally {
+      // Ocultar spinner de carga
+      loadingSpinner.style.display = 'none';
+    }
+  }
+
+  // Función para obtener detalles de una película por su ID de IMDB
+  async function getMovieDetails(title, year) {
+    try {
+      // Primero intentamos buscar por título exacto
+      const response = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(title)}&y=${year}&apikey=8ce64598`);
+      const data = await response.json();
+
+      if (data.Response === "True") {
+        return data;
+      }
+
+      // Si no encontramos por título exacto, intentamos buscar
+      const searchResponse = await fetch(`https://www.omdbapi.com/?s=${encodeURIComponent(title)}&apikey=8ce64598`);
+      const searchData = await searchResponse.json();
+
+      if (searchData.Response === "True" && searchData.Search && searchData.Search.length > 0) {
+        // Intentamos encontrar una coincidencia por año
+        const matchingMovie = searchData.Search.find(movie => movie.Year === year);
+
+        if (matchingMovie) {
+          // Obtenemos los detalles completos usando el ID de IMDB
+          const detailsResponse = await fetch(`https://www.omdbapi.com/?i=${matchingMovie.imdbID}&apikey=8ce64598`);
+          return await detailsResponse.json();
         }
 
-        searchButton.addEventListener('click', filterMovies);
-        searchInput.addEventListener('keyup', filterMovies);
-        genreFilter.addEventListener('change', filterMovies);
+        // Si no hay coincidencia por año, usamos el primer resultado
+        const detailsResponse = await fetch(`https://www.omdbapi.com/?i=${searchData.Search[0].imdbID}&apikey=8ce64598`);
+        return await detailsResponse.json();
+      }
 
-        // Auto-cerrar alertas después de 5 segundos
-        setTimeout(function () {
-            const alerts = document.querySelectorAll('.alert-floating');
-            alerts.forEach(alert => {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
-    });
+      // Si todo falla, devolvemos null
+      return null;
+    } catch (error) {
+      console.error("Error al obtener detalles de la película:", error);
+      return null;
+    }
+  }
+
+  // Función para mostrar detalles de una película
+  async function showMovieDetails(id, title, year, director, posterUrl) {
+    const modal = document.getElementById('movieDetailsModal');
+    const content = document.getElementById('movieDetailsContent');
+
+    // Mostrar modal con información básica mientras se cargan los detalles
+    content.innerHTML = `
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p>Cargando detalles de la película...</p>
+            </div>
+        `;
+    modal.style.display = 'block';
+
+    try {
+      // Obtener detalles adicionales de OMDB
+      const movieDetails = await getMovieDetails(title, year);
+
+      if (movieDetails) {
+        // Actualizar el contenido del modal con los detalles completos
+        content.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img src="${movieDetails.Poster !== 'N/A' ? movieDetails.Poster : posterUrl}"
+                                 class="img-fluid rounded" alt="Póster de ${title}">
+                        </div>
+                        <div class="col-md-8">
+                            <h2>${title}</h2>
+                            <p><strong>Año:</strong> ${year}</p>
+                            <p><strong>Director:</strong> ${director}</p>
+                            <p><strong>Género:</strong> ${movieDetails.Genre || 'No disponible'}</p>
+                            <p><strong>Actores:</strong> ${movieDetails.Actors || 'No disponible'}</p>
+                            <p><strong>Trama:</strong> ${movieDetails.Plot || 'No disponible'}</p>
+                            <p><strong>Premios:</strong> ${movieDetails.Awards || 'No disponible'}</p>
+                            <p><strong>Puntuación IMDB:</strong> ${movieDetails.imdbRating || 'No disponible'}</p>
+                            <p><strong>Taquilla:</strong> ${movieDetails.BoxOffice || 'No disponible'}</p>
+                        </div>
+                    </div>
+                `;
+      } else {
+        // Si no se encuentran detalles, mostrar información básica
+        content.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <img src="${posterUrl}" class="img-fluid rounded" alt="Póster de ${title}">
+                        </div>
+                        <div class="col-md-8">
+                            <h2>${title}</h2>
+                            <p><strong>Año:</strong> ${year}</p>
+                            <p><strong>Director:</strong> ${director}</p>
+                            <p><em>No se pudieron cargar detalles adicionales desde OMDB.</em></p>
+                        </div>
+                    </div>
+                `;
+      }
+    } catch (error) {
+      console.error("Error al mostrar detalles de la película:", error);
+      content.innerHTML = `
+                <div class="alert alert-danger">
+                    Error al cargar los detalles de la película.
+                </div>
+            `;
+    }
+  }
+
+  // Función para cerrar el modal de detalles
+  function closeMovieDetails() {
+    document.getElementById('movieDetailsModal').style.display = 'none';
+  }
+
+  // Cerrar el modal al hacer clic fuera del contenido
+  window.onclick = function(event) {
+    const modal = document.getElementById('movieDetailsModal');
+    if (event.target === modal) {
+      closeMovieDetails();
+    }
+  }
 </script>
 </body>
 </html>

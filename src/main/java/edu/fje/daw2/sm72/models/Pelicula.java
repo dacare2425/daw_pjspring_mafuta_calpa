@@ -1,6 +1,7 @@
 package edu.fje.daw2.sm72.models;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "peliculas")
@@ -11,8 +12,11 @@ public class Pelicula {
 
     private String titulo;
     private String director;
-    private int anyo;
+    private Integer anyo;
     private String genero;
+    @Transient
+    private String posterUrl;
+
 
 
     public Pelicula() {}
@@ -25,6 +29,13 @@ public class Pelicula {
     }
 
     // Getters y Setters
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
     public String getId() {
         return id;
     }
@@ -49,7 +60,7 @@ public class Pelicula {
         this.director = director;
     }
 
-    public int getAnyo() {
+    public Integer getAnyo() {
         return anyo;
     }
 
