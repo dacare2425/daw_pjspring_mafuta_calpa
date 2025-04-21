@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Catálogo de Películas - ClotFilms</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .movie-card {
+            transition: transform 0.3s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-footer {
+            background-color: transparent;
+            border-top: none;
+            margin-top: auto;
+        }
+
+        .genre-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .alert-floating {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">ClotFilms</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/peliculas/catalogo">Catálogo</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/peliculas/mis-peliculas">Mis Películas</a>
+                </li>
+            </ul>
+            <div class="d-flex" sec:authorize="isAuthenticated()">
+                    <span class="navbar-text me-3">
+                        <i class="fas fa-user me-1"></i>                         <span
+                            th:text="${#authentication.principal.attributes['email']}">correo@ejemplo.com</span>
+
+                    </span>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-outline-light btn-sm">Cerrar Sesión</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Alerta para mensajes flash -->
+<div th:if="${mensaje}" th:class="'alert alert-' + ${tipoMensaje} + ' alert-dismissible fade show alert-floating'"
+     role="alert">
+    <span th:text="${mensaje}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5 fw-bold">Catálogo de Películas</h1>
+            <p class="lead">Explora nuestro catálogo y añade películas a tu lista personal.</p>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Buscar películas...">
+                <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <select id="genreFilter" class="form-select">
+                <option value="">Todos los géneros</option>
+                <option value="Acción">Acción</option>
+                <option value="Animación">Animación</option>
+                <option value="Ciencia Ficción">Ciencia Ficción</option>
+                <option value="Comedia">Comedia</option>
+                <option value="Crimen">Crimen</option>
+                <option value="Drama">Drama</option>
+                <option value="Fantasía">Fantasía</option>
+                <option value="Terror">Terror</option>
+                <option value="Thriller">Thriller</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Catálogo de películas -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4" id="movieGrid">
+        <div class="col movie-item" th:each="pelicula : ${peliculas}" th:data-genre="${pelicula.genero}"
+             th:data-title="${pelicula.titulo}">
+            <div class="card movie-card h-100">
+                    <span th:class="'badge genre-badge bg-' + ${#strings.equals(pelicula.genero, 'Acción') ? 'danger' :
+                                                              #strings.equals(pelicula.genero, 'Drama') ? 'primary' :
+                                                              #strings.equals(pelicula.genero, 'Comedia') ? 'success' :
+                                                              #strings.equals(pelicula.genero, 'Ciencia Ficción') ? 'info' :
+                                                              #strings.equals(pelicula.genero, 'Terror') ? 'dark' :
+                                                              #strings.equals(pelicula.genero, 'Fantasía') ? 'warning' :
+                                                              #strings.equals(pelicula.genero, 'Animación') ? 'secondary' :
+                                                              #strings.equals(pelicula.genero, 'Thriller') ? 'danger' :
+                                                              'secondary'}"
+                          th:text="${pelicula.genero}">
+                    </span>
+                <!-- Imagen de la película (placeholder) -->
+                <img class="card-img-top" th:src="'https://picsum.photos/seed/' + ${pelicula.id} + '/400/200'"
+                     alt="Imagen de película">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${pelicula.titulo}">Título de la Película</h5>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="fas fa-film me-1"></i> <span th:text="${pelicula.director}">Director</span>
+                        </small>
+                    </p>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i> <span th:text="${pelicula.anyo}">Año</span>
+                        </small>
+                    </p>
+                </div>
+                <div class="card-footer text-center">
+                    <!-- Botón para añadir a mi lista -->
+                    <form th:if="${!peliculasSeleccionadas.contains(pelicula.id)}"
+                          th:action="@{/peliculas/agregar/{id}(id=${pelicula.id})}" method="post">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-plus me-1"></i> Añadir a mi lista
+                        </button>
+                    </form>
+                    <!-- Mensaje si ya está en mi lista -->
+                    <button th:if="${peliculasSeleccionadas.contains(pelicula.id)}"
+                            class="btn btn-success w-100" disabled>
+                        <i class="fas fa-check me-1"></i> En mi lista
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensaje si no hay películas -->
+    <div th:if="${#lists.isEmpty(peliculas)}" class="alert alert-info mt-4">
+        No hay películas disponibles en el catálogo.
+    </div>
+</div>
+
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>ClotFilms</h5>
+                <p>Tu plataforma de películas favorita</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p>&copy; 2023 ClotFilms. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Filtrado de películas por título y género
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const genreFilter = document.getElementById('genreFilter');
+        const movieItems = document.querySelectorAll('.movie-item');
+
+        function filterMovies() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedGenre = genreFilter.value;
+
+            movieItems.forEach(item => {
+                const title = item.getAttribute('data-title').toLowerCase();
+                const genre = item.getAttribute('data-genre');
+
+                const matchesSearch = title.includes(searchTerm);
+                const matchesGenre = selectedGenre === '' || genre === selectedGenre;
+
+                if (matchesSearch && matchesGenre) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        searchButton.addEventListener('click', filterMovies);
+        searchInput.addEventListener('keyup', filterMovies);
+        genreFilter.addEventListener('change', filterMovies);
+
+        // Auto-cerrar alertas después de 5 segundos
+        setTimeout(function () {
+            const alerts = document.querySelectorAll('.alert-floating');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    });
+</script>
+</body>
+</html>

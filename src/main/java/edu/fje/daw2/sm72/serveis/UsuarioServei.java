@@ -34,9 +34,13 @@ public class UsuarioServei {
     public void eliminarPorId(String id) {
         repositori.deleteById(id);
     }
+
+    public Optional<Usuario> obtenerPorCorreo(String correo) {
+        return repositori.findByCorreo(correo);
+    }
     /**
      * Process a user authenticated via OAuth
-     * @param provider The OAuth provider (google, github, etc)
+     * @param provider The OAuth provider (google)
      * @param attributes User attributes from OAuth provider
      * @return The saved or updated Usuario
      */

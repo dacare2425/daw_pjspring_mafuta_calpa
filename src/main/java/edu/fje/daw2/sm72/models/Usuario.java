@@ -1,10 +1,9 @@
 package edu.fje.daw2.sm72.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "usuarios")
@@ -40,6 +39,36 @@ public class Usuario {
         this.providerId = providerId;
     }
 
+    @ElementCollection
+    @CollectionTable(name = "usuario_peliculas", joinColumns = @JoinColumn(name = "usuario_id"))
+    @Column(name = "pelicula_id")
+    private List<String> peliculasSeleccionadas = new ArrayList<>();
+
+    public List<String> getPeliculasSeleccionadas() {
+        if (peliculasSeleccionadas == null) {
+            peliculasSeleccionadas = new ArrayList<>();
+        }
+        return peliculasSeleccionadas;
+    }
+
+    public void setPeliculasSeleccionadas(List<String> peliculasSeleccionadas) {
+        this.peliculasSeleccionadas = peliculasSeleccionadas;
+    }
+
+    public void agregarPelicula(String peliculaId) {
+        if (peliculasSeleccionadas == null) {
+            peliculasSeleccionadas = new ArrayList<>();
+        }
+        if (!peliculasSeleccionadas.contains(peliculaId)) {
+            peliculasSeleccionadas.add(peliculaId);
+        }
+    }
+
+    public void eliminarPelicula(String peliculaId) {
+        if (peliculasSeleccionadas != null) {
+            peliculasSeleccionadas.remove(peliculaId);
+        }
+    }
     // Add getters and setters for new fields
     public String getProvider() {
         return provider;

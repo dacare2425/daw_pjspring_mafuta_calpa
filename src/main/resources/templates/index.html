@@ -2,152 +2,187 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Películas App</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .navbar-brand {
-      font-weight: bold;
-    }
-    .hero-section {
-      background-color: #f8f9fa;
-      padding: 3rem 0;
-      margin-bottom: 2rem;
-    }
-    .footer {
-      margin-top: 3rem;
-      padding: 1.5rem 0;
-      background-color: #f8f9fa;
-      text-align: center;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClotFilms</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .hero-section {
+            background-color: #f8f9fa;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .footer {
+            margin-top: 3rem;
+            padding: 1.5rem 0;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+
+        .card {
+            transition: transform 0.3s;
+            height: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
 <!-- Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand" href="/">Películas App</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="/">Inicio</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/peliculas">Películas</a>
-        </li>
-      </ul>
+    <div class="container">
+        <a class="navbar-brand" href="/">ClotFilms</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/peliculas/catalogo">Catálogo</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" href="/peliculas/mis-peliculas">Mis Películas</a>
+                </li>
+            </ul>
 
-      <!-- User not logged in -->
-      <ul class="navbar-nav" sec:authorize="!isAuthenticated()">
-        <li class="nav-item">
-          <a class="nav-link" href="/login">Iniciar Sesión</a>
-        </li>
-      </ul>
+            <!-- User not logged in -->
+            <ul class="navbar-nav" sec:authorize="!isAuthenticated()">
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Iniciar Sesión</a>
+                </li>
+            </ul>
 
-      <!-- User logged in -->
-      <ul class="navbar-nav" sec:authorize="isAuthenticated()">
-        <!-- Admin section -->
-        <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
-          <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
-             data-bs-toggle="dropdown" aria-expanded="false">
-            Administración
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-            <li><a class="dropdown-item" href="/admin/usuarios">Gestionar Usuarios</a></li>
-            <li><a class="dropdown-item" href="/admin/peliculas">Gestionar Películas</a></li>
-          </ul>
-        </li>
+            <!-- User logged in -->
+            <ul class="navbar-nav" sec:authorize="isAuthenticated()">
+                <!-- Admin section -->
+                <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        Administración
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                        <li><a class="dropdown-item" href="/admin/usuarios">Gestionar Usuarios</a></li>
+                        <li><a class="dropdown-item" href="/admin/peliculas">Gestionar Películas</a></li>
+                    </ul>
+                </li>
 
-        <!-- User profile -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-             data-bs-toggle="dropdown" aria-expanded="false">
-            <span sec:authentication="name">Usuario</span>
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="userDropdown">
-            <li><a class="dropdown-item" href="/perfil">Mi Perfil</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li>
-              <form th:action="@{/logout}" method="post" class="dropdown-item p-0">
-                <button type="submit" class="btn btn-link text-decoration-none w-100 text-start px-3 py-1">
-                  Cerrar Sesión
-                </button>
-              </form>
-            </li>
-          </ul>
-        </li>
-      </ul>
+                <!-- User profile - Showing email instead of name/id -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:text="${#authentication.principal.attributes['email']}">correo@ejemplo.com</span>
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="/perfil">Mi Perfil</a></li>
+                        <li><a class="dropdown-item" href="/peliculas/mis-peliculas">Mis Películas</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" class="dropdown-item p-0">
+                                <button type="submit"
+                                        class="btn btn-link text-decoration-none w-100 text-start px-3 py-1">
+                                    Cerrar Sesión
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
 
 <!-- Hero Section -->
 <section class="hero-section">
-  <div class="container text-center">
-    <h1>Bienvenido a Películas App</h1>
-    <p class="lead">Explora nuestra colección de películas y series</p>
-    <a href="/peliculas" class="btn btn-primary btn-lg">Ver Películas</a>
-  </div>
+    <div class="container text-center">
+        <h1>Bienvenido a ClotFilms</h1>
+        <p class="lead">Explora nuestra colección de películas y crea tu lista personalizada</p>
+        <div class="mt-4">
+            <a href="/peliculas/catalogo" class="btn btn-primary btn-lg me-2">
+                <i class="fas fa-film me-1"></i> Ver Catálogo
+            </a>
+            <a href="/peliculas/mis-peliculas" class="btn btn-outline-dark btn-lg" sec:authorize="isAuthenticated()">
+                <i class="fas fa-list me-1"></i> Mis Películas
+            </a>
+        </div>
+    </div>
 </section>
 
 <!-- Main Content -->
 <div class="container">
-  <div class="row">
-    <div class="col-md-4 mb-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Películas</h5>
-          <p class="card-text">Explora nuestra colección de películas.</p>
-          <a href="/peliculas" class="btn btn-primary">Ver Películas</a>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-film me-2"></i>Catálogo Completo</h5>
+                    <p class="card-text">Explora nuestra colección completa de películas de todos los géneros.</p>
+                    <a href="/peliculas/catalogo" class="btn btn-primary">Ver Catálogo</a>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-star me-2"></i>Mis Películas</h5>
+                    <p class="card-text">Accede a tu colección personal de películas seleccionadas.</p>
+                    <a href="/peliculas/mis-peliculas" class="btn btn-primary" sec:authorize="isAuthenticated()">Ver Mis
+                        Películas</a>
+                    <a href="/login" class="btn btn-primary" sec:authorize="!isAuthenticated()">Iniciar Sesión</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-search me-2"></i>Buscar</h5>
+                    <p class="card-text">Encuentra películas por título, director o género.</p>
+                    <a href="/peliculas/catalogo" class="btn btn-primary">Buscar Películas</a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="col-md-4 mb-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Novedades</h5>
-          <p class="card-text">Descubre las últimas películas añadidas.</p>
-          <a href="/peliculas/novedades" class="btn btn-primary">Ver Novedades</a>
+    <!-- Admin Section (only visible to admins) -->
+    <div class="row mt-4" sec:authorize="hasRole('ADMIN')">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h4 class="card-title"><i class="fas fa-cog me-2"></i>Administración</h4>
+                    <p class="card-text">Accede a las herramientas de administración para gestionar usuarios y
+                        películas.</p>
+                    <a href="/admin/usuarios" class="btn btn-success me-2">
+                        <i class="fas fa-users me-1"></i> Gestionar Usuarios
+                    </a>
+                    <a href="/admin/peliculas" class="btn btn-success">
+                        <i class="fas fa-film me-1"></i> Gestionar Películas
+                    </a>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-
-    <div class="col-md-4 mb-4">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Populares</h5>
-          <p class="card-text">Las películas más populares entre nuestros usuarios.</p>
-          <a href="/peliculas/populares" class="btn btn-primary">Ver Populares</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Admin Section (only visible to admins) -->
-  <div class="row mt-4" sec:authorize="hasRole('ADMIN')">
-    <div class="col-12">
-      <div class="card bg-light">
-        <div class="card-body">
-          <h4 class="card-title">Administración</h4>
-          <p class="card-text">Accede a las herramientas de administración.</p>
-          <a href="/admin/usuarios" class="btn btn-success me-2">Gestionar Usuarios</a>
-          <a href="/admin/peliculas" class="btn btn-success">Gestionar Películas</a>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- Footer -->
 <footer class="footer">
-  <div class="container">
-    <p>&copy; 2023 Películas App - Todos los derechos reservados</p>
-  </div>
+    <div class="container">
+        <p>&copy; 2023 ClotFilms - Todos los derechos reservados</p>
+    </div>
 </footer>
 
 <!-- Bootstrap JS -->
