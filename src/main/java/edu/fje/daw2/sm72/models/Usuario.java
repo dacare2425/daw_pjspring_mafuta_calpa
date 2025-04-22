@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Model per manegar usuaris autenticats amb Oauth
+ */
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
@@ -51,9 +54,9 @@ public class Usuario {
         return peliculasSeleccionadas;
     }
 
-    public void setPeliculasSeleccionadas(List<String> peliculasSeleccionadas) {
-        this.peliculasSeleccionadas = peliculasSeleccionadas;
-    }
+//    public void setPeliculasSeleccionadas(List<String> peliculasSeleccionadas) {
+//        this.peliculasSeleccionadas = peliculasSeleccionadas;
+//    }
 
     public void agregarPelicula(String peliculaId) {
         if (peliculasSeleccionadas == null) {
@@ -69,7 +72,8 @@ public class Usuario {
             peliculasSeleccionadas.remove(peliculaId);
         }
     }
-    // Add getters and setters for new fields
+
+    // Getters y Setters
     public String getProvider() {
         return provider;
     }
@@ -86,7 +90,6 @@ public class Usuario {
         this.providerId = providerId;
     }
 
-    // Getters y Setters
     public String getId() {
         return id;
     }

@@ -14,6 +14,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Servei per conectar amb la base de dades de Películas, en MongoDB
+ */
 @Service
 public class PeliculaServei {
 
@@ -30,9 +33,9 @@ public class PeliculaServei {
             pelicula.setId(null);
         }
 
-        System.out.println("Guardando película: " + pelicula.getTitulo() + ", ID antes: " + pelicula.getId());
+//        System.out.println("Guardando película: " + pelicula.getTitulo() + ", ID antes: " + pelicula.getId());
         Pelicula guardada = peliculaRepositori.save(pelicula);
-        System.out.println("Película guardada, ID después: " + guardada.getId());
+//        System.out.println("Película guardada, ID después: " + guardada.getId());
         return guardada;
     }
 

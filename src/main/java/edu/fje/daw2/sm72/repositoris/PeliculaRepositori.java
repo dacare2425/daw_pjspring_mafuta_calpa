@@ -6,5 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PeliculaRepositori extends MongoRepository<Pelicula, String> {
-    // Métodos adicionales si los necesitas
 }

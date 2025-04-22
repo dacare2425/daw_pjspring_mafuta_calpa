@@ -4,6 +4,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+/**
+ * Model per películas, desadas en MongoDB. Conté Pelicula.posterUrl per trobar el poster a l'api de OMDB.
+ */
 @Document(collection = "peliculas")
 public class Pelicula {
 

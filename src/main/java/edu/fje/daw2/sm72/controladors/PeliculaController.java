@@ -29,16 +29,17 @@ public class PeliculaController {
     @Autowired
     private UsuarioServei usuarioServei;
 
+
     /**
-     * Muestra el catálogo completo de películas
+     * @param model
+     * @return catalogo.html
+     *
      */
     @GetMapping("/catalogo")
     public String mostrarCatalogo(Model model) {
-        // Obtener todas las películas
         List<Pelicula> todasPeliculas = peliculaServei.obtenerTodas();
         model.addAttribute("peliculas", todasPeliculas);
 
-        // Obtener el usuario actual y sus películas seleccionadas
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String correoUsuario = obtenerCorreoUsuario(auth);
 
@@ -52,11 +53,8 @@ public class PeliculaController {
             model.addAttribute("peliculasSeleccionadas", List.of());
         }
 
-        // Si la plantilla está en una subcarpeta llamada "peliculas", usa esta ruta:
         return "peliculas/catalogo";
 
-        // Si la plantilla está directamente en la carpeta templates, usa esta ruta:
-        // return "catalogo";
     }
     /**
      * Muestra las películas seleccionadas por el usuario
@@ -72,10 +70,8 @@ public class PeliculaController {
             if (usuarioOpt.isPresent()) {
                 Usuario usuario = usuarioOpt.get();
 
-                // Obtener los IDs de películas seleccionadas por el usuario
                 List<String> peliculasIds = usuario.getPeliculasSeleccionadas();
 
-                // Obtener las películas completas desde MongoDB usando los IDs
                 List<Pelicula> peliculasUsuario = new ArrayList<>();
 
                 if (peliculasIds != null && !peliculasIds.isEmpty()) {
