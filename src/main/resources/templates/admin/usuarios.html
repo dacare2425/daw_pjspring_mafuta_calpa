@@ -4,47 +4,140 @@
   <title>Administración de Usuarios</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Add your CSS here -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .table-responsive {
+      overflow-x: auto;
+    }
+    .user-actions {
+      white-space: nowrap;
+    }
+    .badge-provider {
+      font-size: 0.8em;
+    }
+  </style>
 </head>
 <body>
-<h1>Administración de Usuarios</h1>
-
-<a th:href="@{/admin/usuarios/nuevo}" class="btn btn-primary">Nuevo Usuario</a>
-
-<table class="table">
-  <thead>
-  <tr>
-    <th>ID</th>
-    <th>Nombre</th>
-    <th>Correo</th>
-    <th>Admin</th>
-    <th>Proveedor OAuth</th>
-    <th>Acciones</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr th:each="usuario : ${usuarios}">
-    <td th:text="${usuario.id}"></td>
-    <td th:text="${usuario.nombre}"></td>
-    <td th:text="${usuario.correo}"></td>
-    <td>
-      <span th:if="${usuario.esAdmin}" class="badge bg-success">Sí</span>
-      <span th:unless="${usuario.esAdmin}" class="badge bg-secondary">No</span>
-    </td>
-    <td th:text="${usuario.provider != null ? usuario.provider : 'N/A'}"></td>
-    <td>
-      <a th:href="@{/admin/usuarios/{id}(id=${usuario.id})}" class="btn btn-sm btn-info">Ver</a>
-      <a th:href="@{/admin/usuarios/editar/{id}(id=${usuario.id})}" class="btn btn-sm btn-warning">Editar</a>
-      <a th:href="@{/admin/usuarios/eliminar/{id}(id=${usuario.id})}" class="btn btn-sm btn-danger"
-         onclick="return confirm('¿Estás seguro de eliminar este usuario?')">Eliminar</a>
-      <form th:action="@{/admin/usuarios/toggle-admin/{id}(id=${usuario.id})}" method="post" style="display:inline;">
-        <button type="submit" class="btn btn-sm" th:classappend="${usuario.esAdmin ? 'btn-secondary' : 'btn-primary'}">
-          <span th:text="${usuario.esAdmin ? 'Quitar Admin' : 'Hacer Admin'}"></span>
-        </button>
+<!-- Barra de navegación simplificada -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container">
+    <a class="navbar-brand" href="/">Admin Usuarios</a>
+    <div class="d-flex">
+      <form th:action="@{/logout}" method="post" class="ms-3">
+        <button type="submit" class="btn btn-outline-light btn-sm">Cerrar Sesión</button>
       </form>
-    </td>
-  </tr>
-  </tbody>
-</table>
+    </div>
+  </div>
+</nav>
+
+<!-- Contenido principal -->
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Lista de Usuarios</h1>
+    <a th:href="@{/admin/usuarios/nuevo}" class="btn btn-primary">
+      <i class="fas fa-user-plus me-1"></i> Nuevo Usuario
+    </a>
+  </div>
+
+  <!-- Mensajes de alerta -->
+  <div th:if="${mensaje}" class="alert alert-dismissible fade show" th:classappend="'alert-' + ${tipoMensaje}">
+    <span th:text="${mensaje}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+
+  <!-- Tabla de usuarios -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="usuario : ${usuarios}">
+            <td th:text="${usuario.id}"></td>
+            <td th:text="${usuario.nombre}"></td>
+            <td th:text="${usuario.correo}"></td>
+            <td>
+              <span th:if="${usuario.esAdmin}" class="badge bg-danger">Admin</span>
+              <span th:unless="${usuario.esAdmin}" class="badge bg-info">Usuario</span>
+            </td>
+            <td class="user-actions">
+              <a th:href="@{/admin/usuarios/editar/{id}(id=${usuario.id})}" class="btn btn-sm btn-warning me-1">
+                <i class="fas fa-edit"></i> Editar
+              </a>
+              <button type="button" class="btn btn-sm btn-danger"
+                      data-bs-toggle="modal" data-bs-target="#deleteModal"
+                      th:attr="data-bs-userid=${usuario.id}, data-bs-username=${usuario.nombre}">
+                <i class="fas fa-trash"></i> Eliminar
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje si no hay usuarios -->
+  <div th:if="${#lists.isEmpty(usuarios)}" class="alert alert-info mt-4">
+    No hay usuarios registrados en el sistema.
+  </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar al usuario <span id="deleteUserName"></span>?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <form id="deleteForm" method="post">
+          <input type="hidden" name="_method" value="DELETE">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+          <button type="submit" class="btn btn-danger">Eliminar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Configurar modal de eliminación
+  const deleteModal = document.getElementById('deleteModal');
+  if (deleteModal) {
+    deleteModal.addEventListener('show.bs.modal', function(event) {
+      const button = event.relatedTarget;
+      const userId = button.getAttribute('data-bs-userid');
+      const userName = button.getAttribute('data-bs-username');
+
+      document.getElementById('deleteUserName').textContent = userName;
+      document.getElementById('deleteForm').action = `/admin/usuarios/eliminar/${userId}`;
+    });
+  }
+
+  // Auto-cerrar alertas después de 5 segundos
+  setTimeout(function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+      const bsAlert = new bootstrap.Alert(alert);
+      bsAlert.close();
+    });
+  }, 5000);
+</script>
 </body>
 </html>
