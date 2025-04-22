@@ -37,75 +37,7 @@
     </style>
 </head>
 <body>
-<!-- Navigation Bar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="/">ClotFilms</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link active" href="/">Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/peliculas/catalogo">Catálogo</a>
-                </li>
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <a class="nav-link" href="/peliculas/mis-peliculas">Mis Películas</a>
-                </li>
-            </ul>
-
-            <!-- User not logged in -->
-            <ul class="navbar-nav" sec:authorize="!isAuthenticated()">
-                <li class="nav-item">
-                    <a class="nav-link" href="/login">Iniciar Sesión</a>
-                </li>
-            </ul>
-
-            <!-- User logged in -->
-            <ul class="navbar-nav" sec:authorize="isAuthenticated()">
-                <!-- Admin section -->
-                <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
-                    <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        Administración
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                        <li><a class="dropdown-item" href="/admin/usuarios">Gestionar Usuarios</a></li>
-                        <li><a class="dropdown-item" href="/admin/peliculas">Gestionar Películas</a></li>
-                    </ul>
-                </li>
-
-                <!-- User profile - Showing email instead of name/id -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                       data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user me-1"></i>
-                        <span th:text="${#authentication.principal.attributes['email']}">correo@ejemplo.com</span>
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item" href="/perfil">Mi Perfil</a></li>
-                        <li><a class="dropdown-item" href="/peliculas/mis-peliculas">Mis Películas</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <form th:action="@{/logout}" method="post" class="dropdown-item p-0">
-                                <button type="submit"
-                                        class="btn btn-link text-decoration-none w-100 text-start px-3 py-1">
-                                    Cerrar Sesión
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
+<div th:replace="fragments :: navbar"></div>
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container text-center">

@@ -7,17 +7,24 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @author github.com/dacare2425
+ * Aplicación de Spring Boot con Persistencia de Datos en MongoDB, MySQL
+ * desplegados en docker.
+ * Uso de layouts en las vistas de thymeleaf
+ * Conexión a la API OMDB: https://www.omdbapi.com/
+ * Uso de boostrap 5.3 para estilos y formularios
+ */
 @SpringBootApplication
 @EnableMethodSecurity(prePostEnabled = true)
 public class Sm72Application {
 	public static void main(String[] args) {
 		SpringApplication.run(Sm72Application.class, args);
 	}
-//SI ES EL PRIMER COP I NO TENS LA BASE DE DADES INICIALITZADA.
+//SI ES EL PRIMER COP I NO ESTA LA BASE DE DADES DE PELICULAS INICIALITZADA.
 //	@Bean
 //	CommandLineRunner commandLineRunner(PeliculaRepositori peliculaRepositori) {
 //		return args -> {
