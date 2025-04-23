@@ -143,7 +143,7 @@ public class AdminController {
      * Elimina un usuario del sistema.
      * @param id Identificador del usuario a eliminar
      */
-    @GetMapping("/usuarios/eliminar/{id}")
+    @RequestMapping("/usuarios/eliminar/{id}")
     public String eliminarUsuario(@PathVariable String id) {
         usuarioServei.eliminarPorId(id);
         return "redirect:/admin/usuarios";
